@@ -4,7 +4,7 @@ from app.ingest import split_text_into_sentences, chunkify, get_top_cos_sim, get
 from app.embeddings.embed import embed_text, get_model
 from app.generate import generate_answer, stream_generate_answer
 from app.weaviate.client import get_weaviate_client
-from app.weaviate.utility import split_text_by_token_limit
+from app.weaviate.utility import split_text_by_token_limit, pdf_to_dataset
 from app.weaviate.collections.chunks import create_chunks_collection, batch_insert_chunks, get_top_k_chunks
 
 from dotenv import load_dotenv
@@ -12,12 +12,16 @@ from huggingface_hub import login
 from datasets import Dataset, concatenate_datasets
 import os
 import math
+import sys
 
 #### Weaviate Settings ####
 collection_name = "fineweb_chunks"
-arrows = "C:/Users/Opa/Desktop/my_fineweb_cached/data-00000-of-00099.arrow\n" 
+data_files =    f"./mypdf.pdf\n" \
+                f"C:/Users/Opa/Desktop/my_fineweb_cached/data-00000-of-00099.arrow\n"
+#f"C:/Users/Opa/Desktop/my_fineweb_cached/data-00000-of-00099.arrow\n"\
 rows_per_iter = 200  # Number of texts processed (split, embed, chunkify, insert) per iteration
 
+print(data_files)
 
 #### App Initialization ####
 # Load environment variables and authenticate huggingface API
@@ -40,7 +44,7 @@ st.title("🧠 Retrieval-Augmented Generation (RAG) UI")
 with st.sidebar:
     st.header("Dataset & Processing")
     insert_to_db = st.checkbox("Insert dataset to DB", value=False)
-    arrow_files = st.text_area("Arrow file paths (\\n-separated):", arrows).splitlines()
+    data_files_text = st.text_area("Arrow/Pdf file paths (\\n-separated):", data_files).splitlines()
     process_btn = st.button("Run Ingestion")
 
 
@@ -48,8 +52,21 @@ with st.sidebar:
 if process_btn and insert_to_db:
     st.info("Starting ingestion...")
 
-    # Load datasets from provided arrow files and concatenate
-    datasets = [Dataset.from_file(f.strip()) for f in arrow_files if f.strip()]
+    # Load datasets from provided arrow files and concatenate    
+    datasets = []
+    for f in data_files_text:
+        f = f.strip()
+        if not f:
+            continue
+        if f.endswith(".pdf"):
+            # Convert PDF to Dataset
+            ds = pdf_to_dataset(f)
+            datasets.append(ds)
+        else:
+            # Load Arrow dataset directly
+            ds = Dataset.from_file(f)
+            datasets.append(ds)
+    #datasets = [Dataset.from_file(f.strip()) for f in data_files_text if f.strip()]
     dataset = concatenate_datasets(datasets)
 
     n_rows = len(dataset)
