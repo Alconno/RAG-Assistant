@@ -1,0 +1,35 @@
+# Environment variables
+.env
+
+# Python cache files
+**/__pycache__/
+**/*.py[cod]
+
+# Weights/checkpoints (model files)
+app/finetune/Qwen3-0.6B-Instruct/
+qwen-alpaca-lora/checkpoint-*/
+
+# Wandb logs and runs
+wandb/
+
+# PDF files
+mypdf.pdf
+mypdf2.pdf
+
+# VSCode settings
+.vscode/
+
+# Bytecode files
+*.pyc
+*.pyo
+*.pyd
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
