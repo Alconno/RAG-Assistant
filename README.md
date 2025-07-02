@@ -17,8 +17,8 @@
 ## Setup and Installation
 
 ```bash
-git clone https://github.com/Alconno/RAG Assistant.git
-cd RAG Assistant
+git clone https://github.com/Alconno/RAG-Assistant.git
+cd RAG-Assistant
 pip install -r requirements.txt
 ```
 
